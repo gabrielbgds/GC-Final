@@ -1,23 +1,33 @@
 pipeline {
     agent any
+
     stages {
+        stage('Clone') {
+            steps {
+                git branch: 'main', url: 'https://github.com/gabrielbgds/GC-Final'
+            }
+        }
         stage('Build') {
             steps {
-                echo 'Building...'
-                // Adicione seus passos de build aqui
+                script {
+                    dockerImage = docker.build("meu-app:latest")
+                }
             }
         }
         stage('Test') {
             steps {
-                echo 'Testing...'
-                // Adicione seus passos de teste aqui
+                script {
+                    dockerImage.inside {
+                        sh 'make test' 
+                    }
+                }
             }
         }
-        stage('Deploy') {
-            steps {
-                echo 'Deploying...'
-                // Adicione seus passos de deploy aqui
-            }
+    }
+
+    post {
+        always {
+            cleanWs()
         }
     }
 }
